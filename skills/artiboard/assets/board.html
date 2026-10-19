@@ -49,6 +49,7 @@
   --agent:#C3B2EE; --agent-soft:#2A2338; color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.65;font-variant-numeric:tabular-nums;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 72px}
 button,select,input,textarea{font:inherit;color:inherit}
@@ -244,10 +245,10 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 .node.oncrit{box-shadow:0 0 0 2px var(--accent)}
 .node.cursor{outline:2px solid var(--ink);outline-offset:3px}
 .node[aria-current="true"]{background:var(--accent-soft)}
-.node .r1{display:flex;align-items:center;gap:6px;min-width:0}
+.node .r1{flex:none;display:flex;align-items:center;gap:6px;min-width:0}
 .node .r1 .dot-new{margin-left:auto}
-.node .tt{font-size:12.5px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.node .r3{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .tt{flex:none;font-size:12.5px;font-weight:600;line-height:1.4;max-height:2.8em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node .r3{flex:none;margin-top:auto;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node .r3.ready{color:var(--accent);font-weight:600}
 .graph path.e{fill:none;stroke:var(--edge);stroke-width:1.5;transition:opacity .15s}
 .graph path.e.met{stroke:var(--muted)}
@@ -259,7 +260,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 .graph.focus .node:not(.hi){opacity:.28}
 .graph.focus path.e:not(.hi){opacity:.12}
 .graph .node.nomatch{opacity:.25}
-.swatch{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:4px;margin-right:6px}
+.legend i.swatch{display:inline-block;width:18px;height:0;border-radius:0;background:none;border-top:2px solid;vertical-align:4px;margin-right:6px}
 
 /* detail sheet */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:10}
@@ -772,7 +773,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   }
 
   // ---------- dependency graph ----------
-  var G={W:224,H:78,GX:68,GY:12,PAD:18,TOP:38};
+  var G={W:224,H:98,GX:68,GY:12,PAD:18,TOP:38};
   var graphRel=null;
   function graphModel(){
     var ts=tasks.slice().sort(byKey),lvl={},busy={};

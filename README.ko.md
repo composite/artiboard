@@ -20,7 +20,7 @@
 화면은 페이지 코드가 아티팩트 DB에서 바로 그려서, 토큰 한 개 쓰지 않고도 늘 최신입니다.<br/>
 에이전트는 저장소에 둔 짧은 규칙을 따릅니다. 통째로 읽지 않고 질의하고, 쓰기는 한 번에 묶고, 긴 스레드 대신 요약을 읽습니다.
 
-[빠른 시작](#빠른-시작) · [사용법](#사용법) · [동작 방식](#동작-방식) · [토큰 설계](#토큰-설계) · [에이전트용 안내](FOR_AGENTS.md)
+[데모](#미리-보기) · [빠른 시작](#빠른-시작) · [사용법](#사용법) · [동작 방식](#동작-방식) · [토큰 설계](#토큰-설계) · [에이전트용 안내](FOR_AGENTS.md)
 
 </div>
 
@@ -32,6 +32,40 @@
 > ```
 >
 > Claude가 스킬을 설치한 뒤 인원(1명, 2명, 3명 또는 원하는 수), 일을 나누는 방식, 보드 언어, 첫 태스크를 어디서 가져올지를 묻습니다.
+
+## 미리 보기
+
+**[라이브 데모 열기 →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** 레시피 앱을 만드는 가상의 3인 팀과 태스크 14개입니다. 실제 보드 페이지를 페이지 안의 예시 데이터로 돌리니 마음껏 눌러 보세요. 태스크 집기, 스레드에 글 남기기, 찾기, `j`/`k` 이동. 몇 초 뒤 에이전트의 업데이트 두 개가 저절로 들어옵니다.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
+  <img alt="선행 그래프 보기" src="docs/assets/screens/graph-light.png" width="100%">
+</picture>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
+  <img alt="문서 보기" src="docs/assets/screens/doc-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>문서 보기</sub></p>
+
+</td>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
+  <img alt="칸반 보기" src="docs/assets/screens/kanban-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>칸반</sub></p>
+
+</td>
+</tr>
+</table>
 
 ## 왜 artiboard인가
 
@@ -181,6 +215,7 @@ flowchart LR
 skills/artiboard/SKILL.md               스킬: 설치, 조정, 업그레이드, 토큰 규칙
 skills/artiboard/assets/board.html      보드 페이지 (아티팩트 DB에서 그림)
 skills/artiboard/references/protocol.md 저장소에 들어갈 규칙 파일 틀
+examples/                               board.html과 demo-data.json으로 공개 데모를 만듦: build-demo.cjs, demo-data.json, demo.html
 FOR_AGENTS.md                           AI 에이전트용 설치 안내
 .claude-plugin/                         Claude Code 플러그인 정의
 tests/smoke.cjs                         보드 페이지 jsdom 시험
@@ -194,6 +229,12 @@ docs/assets/                            배너
 
 ```bash
 npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
+```
+
+페이지를 고친 뒤 데모를 다시 만듭니다.
+
+```bash
+node examples/build-demo.cjs
 ```
 
 이슈와 PR을 환영합니다. 스킬을 바꿀 때는 에이전트의 행동이나 토큰 사용이 어떻게 달라지는지, 가능하면 실제 보드에서 전과 후를 보여 주세요.

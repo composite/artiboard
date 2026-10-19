@@ -20,7 +20,7 @@
 La página dibuja todo desde la base de datos del artifact con código, así que se mantiene al día sin gastar un solo token.<br/>
 Los agentes siguen unas pocas reglas ligeras que viven en tu repositorio: consultar en vez de listar, un lote por acción, resúmenes en vez de hilos largos.
 
-[Inicio rápido](#inicio-rápido) · [Uso](#uso) · [Cómo funciona](#cómo-funciona) · [Diseño de tokens](#diseño-de-tokens) · [Para agentes](FOR_AGENTS.md)
+[Demo](#demo) · [Inicio rápido](#inicio-rápido) · [Uso](#uso) · [Cómo funciona](#cómo-funciona) · [Diseño de tokens](#diseño-de-tokens) · [Para agentes](FOR_AGENTS.md)
 
 </div>
 
@@ -32,6 +32,40 @@ Los agentes siguen unas pocas reglas ligeras que viven en tu repositorio: consul
 > ```
 >
 > Claude instala la skill y luego pregunta cuántas personas (1, 2, 3 o cualquier número), cómo repartís el trabajo, el idioma del tablero y de dónde salen las primeras tareas.
+
+## Demo
+
+**[Abrir la demo en vivo →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** Un equipo ficticio de tres personas que construye una app de recetas, con 14 tareas. Ejecuta la página real del tablero con datos de ejemplo dentro de la página, así que pruébalo sin miedo: toma una tarea, escribe en un hilo, busca, pulsa `j`/`k`. A los pocos segundos llegan solas dos actualizaciones de agentes.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
+  <img alt="Vista del grafo de dependencias" src="docs/assets/screens/graph-light.png" width="100%">
+</picture>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
+  <img alt="Vista de documento" src="docs/assets/screens/doc-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>Vista de documento</sub></p>
+
+</td>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
+  <img alt="Vista kanban" src="docs/assets/screens/kanban-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>Kanban</sub></p>
+
+</td>
+</tr>
+</table>
 
 ## Por qué artiboard
 
@@ -181,6 +215,7 @@ Libremente: título, personas, roles, idioma, textos, nombres de funciones, esqu
 skills/artiboard/SKILL.md               la skill: instalación, adaptación, actualización, reglas de tokens
 skills/artiboard/assets/board.html      la página del tablero (dibuja desde la base de datos del artifact)
 skills/artiboard/references/protocol.md plantilla del archivo de reglas que se instala en tu repo
+examples/                               genera la demo pública a partir de board.html y demo-data.json: build-demo.cjs, demo-data.json, demo.html
 FOR_AGENTS.md                           instalación paso a paso para agentes de IA
 .claude-plugin/                         manifiestos del plugin de Claude Code
 tests/smoke.cjs                         prueba de humo de la página con jsdom
@@ -194,6 +229,12 @@ docs/assets/                            banners
 
 ```bash
 npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
+```
+
+Regenera la demo después de cambiar la página:
+
+```bash
+node examples/build-demo.cjs
 ```
 
 Se agradecen issues y PRs. Para un cambio en la skill, muestra cómo cambia el comportamiento del agente o el uso de tokens, idealmente con un antes y un después en un tablero real.

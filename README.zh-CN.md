@@ -20,7 +20,7 @@
 页面代码直接从 artifact 的数据库绘制一切，所以无需花费任何 token 就始终是最新的。<br/>
 Agent 遵循放在你仓库里的几条精简规则：用查询代替全量读取，每个动作一次批量写入，用摘要代替冗长的讨论串。
 
-[快速开始](#快速开始) · [使用](#使用) · [工作原理](#工作原理) · [Token 设计](#token-设计) · [给 agent 的说明](FOR_AGENTS.md)
+[演示](#演示) · [快速开始](#快速开始) · [使用](#使用) · [工作原理](#工作原理) · [Token 设计](#token-设计) · [给 agent 的说明](FOR_AGENTS.md)
 
 </div>
 
@@ -32,6 +32,40 @@ Agent 遵循放在你仓库里的几条精简规则：用查询代替全量读�
 > ```
 >
 > Claude 会先安装这个 skill，然后询问人数（1 人、2 人、3 人或任意人数）、分工方式、看板语言，以及第一批任务从哪里来。
+
+## 演示
+
+**[打开在线演示 →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** 一个正在开发菜谱应用的虚构三人团队，共 14 个任务。它用页面内的示例数据运行真实的看板页面，随便点：认领任务、在讨论串里留言、搜索、按 `j`/`k` 移动。几秒后会自动收到两条 agent 更新。
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
+  <img alt="依赖图视图" src="docs/assets/screens/graph-light.png" width="100%">
+</picture>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
+  <img alt="文档视图" src="docs/assets/screens/doc-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>文档视图</sub></p>
+
+</td>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
+  <img alt="看板视图" src="docs/assets/screens/kanban-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>看板</sub></p>
+
+</td>
+</tr>
+</table>
 
 ## 为什么是 artiboard
 
@@ -181,6 +215,7 @@ flowchart LR
 skills/artiboard/SKILL.md               skill：安装、调整、升级、token 规则
 skills/artiboard/assets/board.html      看板页面（从 artifact 数据库绘制）
 skills/artiboard/references/protocol.md 安装到你仓库的规则文件模板
+examples/                               用 board.html 和 demo-data.json 生成公开演示: build-demo.cjs, demo-data.json, demo.html
 FOR_AGENTS.md                           给 AI agent 的分步安装说明
 .claude-plugin/                         Claude Code 插件清单
 tests/smoke.cjs                         看板页面的 jsdom 冒烟测试
@@ -194,6 +229,12 @@ docs/assets/                            横幅
 
 ```bash
 npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
+```
+
+修改页面后重新生成演示：
+
+```bash
+node examples/build-demo.cjs
 ```
 
 欢迎提交 issue 和 PR。修改 skill 时，请说明 agent 行为或 token 用量如何变化，最好附上在真实看板上的前后对比。

@@ -20,7 +20,7 @@
 The page draws everything from the artifact's database in code, so it stays live without spending a token.<br/>
 Agents follow a few lean rules that live in your repo: query instead of list, one batch per action, summaries instead of long threads.
 
-[Quick start](#quick-start) · [Use it](#use-it) · [How it works](#how-it-works) · [Token design](#token-design) · [For agents](FOR_AGENTS.md)
+[Demo](#see-it) · [Quick start](#quick-start) · [Use it](#use-it) · [How it works](#how-it-works) · [Token design](#token-design) · [For agents](FOR_AGENTS.md)
 
 </div>
 
@@ -32,6 +32,40 @@ Agents follow a few lean rules that live in your repo: query instead of list, on
 > ```
 >
 > Claude installs the skill, then asks how many people (1, 2, 3 or any number), how you split work, the board language and where the first tasks come from.
+
+## See it
+
+**[Open the live demo →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** A sample three-person team building a recipe app, with 14 tasks. It runs the real board page on in-page sample data, so click around freely: claim a task, post in a thread, search, press `j`/`k`. Two agent updates arrive on their own after a few seconds.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
+  <img alt="Dependency graph view" src="docs/assets/screens/graph-light.png" width="100%">
+</picture>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
+  <img alt="Document view" src="docs/assets/screens/doc-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>Document view</sub></p>
+
+</td>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
+  <img alt="Kanban view" src="docs/assets/screens/kanban-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>Kanban</sub></p>
+
+</td>
+</tr>
+</table>
 
 ## Why artiboard
 
@@ -181,6 +215,7 @@ Free: title, people, roles, language, labels, feature names, key scheme, message
 skills/artiboard/SKILL.md               the skill: setup, adapt, upgrade, token rules
 skills/artiboard/assets/board.html      the board page (renders from the artifact database)
 skills/artiboard/references/protocol.md template for the rules file installed into your repo
+examples/                               builds the public demo from board.html and demo-data.json: build-demo.cjs, demo-data.json, demo.html
 FOR_AGENTS.md                           step-by-step install for AI agents
 .claude-plugin/                         Claude Code plugin manifests
 tests/smoke.cjs                         jsdom smoke test of the board page
@@ -194,6 +229,12 @@ docs/assets/                            banners
 
 ```bash
 npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
+```
+
+Rebuild the demo after changing the page:
+
+```bash
+node examples/build-demo.cjs
 ```
 
 Issues and PRs are welcome. For a change to the skill, show how agent behavior or token use changes, ideally before and after on a real board.

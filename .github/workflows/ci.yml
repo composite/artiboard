@@ -28,3 +28,7 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund jsdom@24.1.1
           node tests/smoke.cjs
+      - name: Demo is built from the current page
+        run: |
+          node examples/build-demo.cjs
+          git diff --exit-code -- examples/demo.html

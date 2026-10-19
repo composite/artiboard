@@ -20,7 +20,7 @@
 画面はページのコードがアーティファクトのデータベースから直接描くので、トークンを使わずに常に最新です。<br/>
 エージェントはリポジトリに置いた短いルールに従います。一覧ではなくクエリで読み、書き込みは一度にまとめ、長いスレッドの代わりに要約を読みます。
 
-[クイックスタート](#クイックスタート) · [使い方](#使い方) · [仕組み](#仕組み) · [トークン設計](#トークン設計) · [エージェント向け](FOR_AGENTS.md)
+[デモ](#デモ) · [クイックスタート](#クイックスタート) · [使い方](#使い方) · [仕組み](#仕組み) · [トークン設計](#トークン設計) · [エージェント向け](FOR_AGENTS.md)
 
 </div>
 
@@ -32,6 +32,40 @@
 > ```
 >
 > Claude がスキルを入れたあと、人数(1人、2人、3人、または任意の数)、仕事の分け方、ボードの言語、最初のタスクをどこから作るかを尋ねます。
+
+## デモ
+
+**[ライブデモを開く →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** レシピアプリを作る架空の3人チームと14個のタスクです。本物のボードページをページ内のサンプルデータで動かしているので、自由に触ってください。タスクを取る、スレッドに書く、検索、`j`/`k` で移動。数秒後にエージェントの更新が2件、ひとりでに届きます。
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
+  <img alt="依存グラフのビュー" src="docs/assets/screens/graph-light.png" width="100%">
+</picture>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
+  <img alt="ドキュメントビュー" src="docs/assets/screens/doc-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>ドキュメントビュー</sub></p>
+
+</td>
+<td width="50%" valign="top">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
+  <img alt="カンバンビュー" src="docs/assets/screens/kanban-light.png" width="100%">
+</picture>
+
+<p align="center"><sub>カンバン</sub></p>
+
+</td>
+</tr>
+</table>
 
 ## なぜ artiboard か
 
@@ -181,6 +215,7 @@ flowchart LR
 skills/artiboard/SKILL.md               スキル: セットアップ、調整、アップグレード、トークンのルール
 skills/artiboard/assets/board.html      ボードページ(アーティファクト DB から描画)
 skills/artiboard/references/protocol.md リポジトリに入れるルールファイルの雛形
+examples/                               board.html と demo-data.json から公開デモを生成: build-demo.cjs, demo-data.json, demo.html
 FOR_AGENTS.md                           AI エージェント向けのインストール手順
 .claude-plugin/                         Claude Code プラグインの定義
 tests/smoke.cjs                         ボードページの jsdom テスト
@@ -194,6 +229,12 @@ docs/assets/                            バナー
 
 ```bash
 npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
+```
+
+ページを変えたらデモを作り直します。
+
+```bash
+node examples/build-demo.cjs
 ```
 
 Issue と PR を歓迎します。スキルを変えるときは、エージェントの振る舞いやトークン使用がどう変わるかを、できれば実際のボードでの前後で示してください。

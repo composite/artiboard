@@ -1,0 +1,14 @@
+{
+  "name": "artiboard",
+  "owner": {
+    "name": "yulmucoffee",
+    "url": "https://github.com/yulmucoffee"
+  },
+  "plugins": [
+    {
+      "name": "artiboard",
+      "source": "./",
+      "description": "A shared task board for people and their Claude agents, as one claude.ai artifact."
+    }
+  ]
+}

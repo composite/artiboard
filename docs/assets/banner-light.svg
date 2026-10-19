@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="artiboard: one artifact, every agent on the same page">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f6f4ef"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="318" rx="24" fill="url(#bg)" stroke="#e2dfd9" stroke-width="2"/>
+<g transform="translate(96 62)">
+<rect x="0" y="0" width="104" height="196" rx="12" fill="#f3f2ee" stroke="#e2dfd9"/>
+<rect x="14" y="14" width="40" height="6" rx="3" fill="#d3cfc8"/>
+<rect x="8" y="34" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="8" y="34" width="5" height="42" rx="2" fill="#2b6bef"/>
+<rect x="20" y="45" width="52" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="20" y="58" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<rect x="8" y="86" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="8" y="86" width="5" height="42" rx="2" fill="#2f8559"/>
+<rect x="20" y="97" width="40" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="20" y="110" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<rect x="8" y="138" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="8" y="138" width="5" height="42" rx="2" fill="#d3cfc8"/>
+<rect x="20" y="149" width="52" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="20" y="162" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<rect x="120" y="0" width="104" height="196" rx="12" fill="#f3f2ee" stroke="#e2dfd9"/>
+<rect x="134" y="14" width="40" height="6" rx="3" fill="#d3cfc8"/>
+<rect x="128" y="34" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="128" y="34" width="5" height="42" rx="2" fill="#2b6bef"/>
+<rect x="140" y="45" width="52" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="140" y="58" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<rect x="128" y="86" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="128" y="86" width="5" height="42" rx="2" fill="#d9691f"/>
+<rect x="140" y="97" width="40" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="140" y="110" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<rect x="240" y="0" width="104" height="196" rx="12" fill="#f3f2ee" stroke="#e2dfd9"/>
+<rect x="254" y="14" width="40" height="6" rx="3" fill="#d3cfc8"/>
+<rect x="248" y="34" width="88" height="42" rx="7" fill="#ffffff" stroke="#e2dfd9"/>
+<rect x="248" y="34" width="5" height="42" rx="2" fill="#2f8559"/>
+<rect x="260" y="45" width="52" height="6" rx="3" fill="#1a1a18" opacity="0.75"/>
+<rect x="260" y="58" width="34" height="5" rx="2.5" fill="#6b6862" opacity="0.6"/>
+<path d="M96 55 C110 55 114 55 125 55" fill="none" stroke="#2b6bef" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="126" cy="55" r="3.5" fill="#2b6bef"/>
+<path d="M216 107 C230 107 234 55 245 55" fill="none" stroke="#2b6bef" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="246" cy="55" r="3.5" fill="#2b6bef"/>
+<path d="M96 107 C110 107 114 107 125 107" fill="none" stroke="#2b6bef" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="126" cy="107" r="3.5" fill="#2b6bef"/>
+</g>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<text x="520" y="148" font-size="92" font-weight="800" fill="#1a1a18" letter-spacing="-2">artiboard</text>
+<text x="524" y="196" font-size="28" font-weight="600" fill="#2b6bef">One artifact. Every agent on the same page.</text>
+<text x="524" y="240" font-size="20" fill="#6b6862">A shared task board for people and Claude agents · zero-token views</text>
+</g></svg>

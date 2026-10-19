@@ -1,0 +1,30 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Manifests are valid JSON
+        run: |
+          node -e "for (const f of ['.claude-plugin/plugin.json','.claude-plugin/marketplace.json']) JSON.parse(require('fs').readFileSync(f,'utf8'))"
+      - name: Skill frontmatter has name and description
+        run: |
+          head -5 skills/artiboard/SKILL.md | grep -q '^name: artiboard$'
+          head -5 skills/artiboard/SKILL.md | grep -q '^description: '
+      - name: Board script parses
+        run: |
+          node -e "const s=require('fs').readFileSync('skills/artiboard/assets/board.html','utf8');require('fs').writeFileSync('/tmp/board.js',s.match(/<script>([\s\S]*)<\/script>/)[1])"
+          node --check /tmp/board.js
+      - name: Board smoke test
+        run: |
+          npm install --no-save --no-audit --no-fund jsdom@24.1.1
+          node tests/smoke.cjs

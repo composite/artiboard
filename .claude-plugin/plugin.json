@@ -1,6 +1,6 @@
 {
   "name": "artiboard",
-  "description": "A shared task board for people and their Claude agents, built as one claude.ai artifact with its own database. Token-lean by design.",
+  "description": "Project task boards for people and coding agents, with Claude Artifacts or a persistent local webserver.",
   "author": {
     "name": "yulmucoffee",
     "url": "https://github.com/yulmucoffee"
@@ -8,5 +8,12 @@
   "homepage": "https://github.com/yulmucoffee/artiboard",
   "repository": "https://github.com/yulmucoffee/artiboard",
   "license": "MIT",
-  "keywords": ["task-board", "kanban", "artifacts", "multi-agent", "coordination", "skills"]
+  "keywords": [
+    "task-board",
+    "kanban",
+    "artifacts",
+    "multi-agent",
+    "coordination",
+    "skills"
+  ]
 }

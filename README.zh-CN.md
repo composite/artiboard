@@ -1,3 +1,5 @@
+> This translation describes the original Artifact-only release. For the current local backend and general-agent setup, see [English](README.md) or [한국어](README.ko.md).
+
 <div align="center">
 
 <picture>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Artiboard"
+  short_description: "Project boards for people and coding agents"
+  default_prompt: "Use $artiboard to set up a persistent task board for this project using the available backend."

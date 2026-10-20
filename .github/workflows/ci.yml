@@ -13,6 +13,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
       - name: Manifests are valid JSON
         run: |
           node -e "for (const f of ['.claude-plugin/plugin.json','.claude-plugin/marketplace.json']) JSON.parse(require('fs').readFileSync(f,'utf8'))"
@@ -24,10 +27,14 @@ jobs:
         run: |
           node -e "const s=require('fs').readFileSync('skills/artiboard/assets/board.html','utf8');require('fs').writeFileSync('/tmp/board.js',s.match(/<script>([\s\S]*)<\/script>/)[1])"
           node --check /tmp/board.js
+          node --check skills/artiboard/assets/local.js
+      - name: Local persistence and HTTP boundaries
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Board smoke test
         run: |
           npm install --no-save --no-audit --no-fund jsdom@24.1.1
           node tests/smoke.cjs
+          node tests/local-smoke.cjs
       - name: Demo is built from the current page
         run: |
           node examples/build-demo.cjs

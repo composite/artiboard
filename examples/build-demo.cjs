@@ -57,9 +57,7 @@ const shim=`<script>
 `;
 function swap(a,b){if(!page.includes(a))throw new Error('board.html changed; update build-demo.cjs: '+a);page=page.replace(a,b)}
 swap('<title>Project Board</title>','<meta charset="utf-8">\n<title>artiboard demo</title>');
-swap("claude.use('db')","DEMO.use('db')");
-swap("claude.use('user')","DEMO.use('user')");
-swap('if(window.claude&&window.claude.use)start();','if(window.DEMO)start();');
+swap('var provider=window.artiboard||window.claude;','var provider=window.DEMO;');
 const i=page.lastIndexOf('<script>');
 page=page.slice(0,i)+shim+page.slice(i);
 fs.writeFileSync(path.join(__dirname,'demo.html'),page);

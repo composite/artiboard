@@ -399,7 +399,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   // ---------- strings: meta/config.lang picks a table; meta/config.strings overrides any key ----------
   var I18N={
     en:{
-      loading:'Loading…',noDb:'Board data is not available in this view. Open it on claude.ai.',loadFail:'Could not load tasks ({e})',
+      loading:'Loading…',noDb:'Board data is unavailable. Open the running local board URL or its Claude Artifact.',loadFail:'Could not load tasks ({e})',
       milestone:'Milestone',tasksCount:'{n} tasks · {d} done',lastChange:'Last change {t}',iAm:'I am',
       st_todo:'To do',st_doing:'In progress',st_review:'Review',st_blocked:'Blocked',st_done:'Done',
       ty_note:'Note',ty_update:'Update',ty_question:'Question',ty_answer:'Answer',ty_handoff:'Handoff',ty_blocker:'Blocker',
@@ -433,7 +433,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
       notYou:'{p} is linked to another account. What you post here will still show {p}.',linkedElse:'Your account is linked to {q}. What you post here will show {p}.'
     },
     ko:{
-      loading:'불러오는 중이에요.',noDb:'이 화면에서는 판 데이터를 쓸 수 없어요. claude.ai에서 열어 주세요.',loadFail:'태스크를 불러오지 못했어요 ({e})',
+      loading:'불러오는 중이에요.',noDb:'판 데이터를 쓸 수 없어요. 실행 중인 로컬 보드 URL이나 Claude Artifact에서 열어 주세요.',loadFail:'태스크를 불러오지 못했어요 ({e})',
       milestone:'마일스톤',tasksCount:'태스크 {n}개 · 완료 {d}',lastChange:'마지막 변화 {t}',iAm:'나는',
       st_todo:'할 일',st_doing:'진행 중',st_review:'검토',st_blocked:'막힘',st_done:'완료',
       ty_note:'메모',ty_update:'진행',ty_question:'질문',ty_answer:'답',ty_handoff:'인계',ty_blocker:'막힘',
@@ -482,8 +482,9 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   var q='',newOnly=false,cursor=null,order=[],openPrevSeen='',det=null,unsubDet=null,sumEditing=false;
   var seen=readJSON('ab-seen')||{},noticeSeen=read('ab-notice-seen')||'';
 
-  function read(k){try{return localStorage.getItem(k)}catch(e){return null}}
-  function write(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function storageKey(k){return (window.artiboard&&window.artiboard.storageKey||'')+k}
+  function read(k){try{return localStorage.getItem(storageKey(k))}catch(e){return null}}
+  function write(k,v){try{localStorage.setItem(storageKey(k),v)}catch(e){}}
   function readJSON(k){try{return JSON.parse(read(k)||'null')}catch(e){return null}}
   function el(tag,a,kids){var n=document.createElement(tag);if(a)for(var k in a){var v=a[k];if(v==null)continue;if(k==='text')n.textContent=v;else if(k==='class')n.className=v;else if(k.slice(0,2)==='on')n.addEventListener(k.slice(2),v);else n.setAttribute(k,v)}(kids||[]).forEach(function(c){if(c!=null&&c!==false)n.appendChild(typeof c==='string'?document.createTextNode(c):c)});return n}
   var SVGNS='http://www.w3.org/2000/svg';
@@ -667,6 +668,12 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   }
   function claim(t,btn){
     if(!writable()||!me)return;btn.disabled=true;
+    if(db.claim){
+      var at=now();
+      db.claim(t.id,me,at).then(function(){markSeen(t.id,at);toast(T('claimed',{p:pname(me),k:t.key}))})
+        .catch(function(e){toast(e.code==='conflict'?T('alreadyClaimed'):T('claimFail',{e:errText(e)}))})
+        .finally(function(){btn.disabled=false});return;
+    }
     db.doc('tasks/'+t.id).get().then(function(s){
       var d=s.exists?s.data():null;
       if(!d||d.claimedBy||(d.status||'todo')!=='todo'){toast(T('alreadyClaimed'));return}
@@ -1089,10 +1096,10 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 
   function start(){
     renderAll();
-    claude.use('user').then(function(u){if(!u)return;
+    provider.use('user').then(function(u){if(!u)return;
       return Promise.all([u.id(),u.can('data.write')]).then(function(r){uid=r[0]||null;canWrite=r[1];identify();renderAll()});
     }).catch(function(){});
-    claude.use('db').then(function(d){
+    provider.use('db').then(function(d){
       db=d;
       if(!db){failed=T('noDb');renderAll();return}
       var first=true;
@@ -1121,7 +1128,8 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
     });
   }
   applyConfig({});
-  if(window.claude&&window.claude.use)start();else{failed=T('noDb');renderAll()}
+  var provider=window.artiboard||window.claude;
+  if(provider&&provider.use)start();else{failed=T('noDb');renderAll()}
   setInterval(function(){if(loaded){renderHead();if(view==='doc'&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#feed'))){renderTable();applyCursor()}}},60000);
 })();
 </script>

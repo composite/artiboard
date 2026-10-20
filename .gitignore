@@ -1,2 +1,4 @@
 node_modules/
 .DS_Store
+.artiboard/
+__pycache__/

@@ -20,13 +20,43 @@ Read skills/artiboard/SKILL.md from this checkout and set up a task board for th
 Use the local backend if Artifact tools are unavailable.
 ```
 
-For project-local skill installation, run your skill manager from the target project. With the `skills` CLI:
+## Installation
+
+Choose one installation route. The Skills CLI route needs Node.js/npm and installs into the target project by default. Run it from that project with the absolute path to this checkout:
 
 ```bash
-npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex claude-code
+npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex
 ```
 
-Select the agents you use. Personal/global installation is optional (`--global`), not required. See [FOR_AGENTS.md](FOR_AGENTS.md) for agent setup and upgrade rules. Clone or edit of the source alone does not install it globally.
+Keep only the agent names you use. Add `--list` to preview discovery, or `--global` for an explicitly chosen personal installation. The package includes Agent Skills frontmatter (`license`, `compatibility`, author/version/source metadata), Codex UI metadata, the runtime, assets, references and MIT license. No npm package publication is required.
+
+After the `universal` branch is published to the fork, the equivalent GitHub installation is:
+
+```bash
+npx skills add https://github.com/composite/artiboard/tree/universal --skill artiboard --agent codex
+```
+
+Until that branch is pushed, use the local-checkout command. `composite/artiboard` without a ref follows the default branch and may install the original release.
+
+For a Codex plugin installation, use a CLI with `codex plugin` support:
+
+```bash
+codex plugin marketplace add /absolute/path/to/artiboard
+codex plugin add artiboard@artiboard-universal
+```
+
+This registers a marketplace and installs into the current Codex user's plugin configuration; use the Skills CLI route for a project-local skill. In the desktop app, select **Artiboard Universal** in the plugin directory and install **Artiboard**; restart if the new local source is not visible. The repository includes portable `plugin.json`, `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`. Once the branch is published, the marketplace source can instead be `codex plugin marketplace add composite/artiboard --ref universal`.
+
+Claude Code users should use the original [yulmucoffee/artiboard](https://github.com/yulmucoffee/artiboard):
+
+```bash
+claude plugin marketplace add yulmucoffee/artiboard --scope project
+claude plugin install artiboard@artiboard --scope project
+```
+
+The upstream Claude manifests are preserved. This fork's Codex marketplace is named `artiboard-universal`; it does not replace the original Claude plugin. Avoid enabling duplicate skill installations in the same agent. See [FOR_AGENTS.md](FOR_AGENTS.md) for setup and upgrades. Cloning or editing the source alone does not install it globally.
+
+## Run a local board
 
 To run an empty local board directly from this checkout, choose your title/person ID, then:
 
@@ -91,7 +121,7 @@ node tests/local-smoke.cjs
 node examples/build-demo.cjs
 ```
 
-Python tests cover persistence, rollback, concurrent CLI claims, query semantics, worktree paths and HTTP boundaries. jsdom runs the existing Artifact-shaped fake tests and the real local server/adapter/page flow, including concurrent browser claims, disconnection and restart. CI also checks manifests, script syntax and demo freshness. jsdom is a development dependency only.
+Python tests cover persistence, rollback, concurrent CLI claims, query semantics, worktree paths and HTTP boundaries. jsdom runs the existing Artifact-shaped fake tests and the real local server/adapter/page flow, including concurrent browser claims, disconnection and restart. CI also checks Skills CLI discovery and installation, manifests, script syntax and demo freshness. jsdom is a development dependency only.
 
 ```text
 skills/artiboard/SKILL.md            backend routing and workflow
@@ -99,6 +129,10 @@ skills/artiboard/agents/openai.yaml Codex discovery metadata
 skills/artiboard/assets/            shared page and local browser adapter
 skills/artiboard/scripts/           standard-library local runtime/CLI
 skills/artiboard/references/        local, Artifact and project protocol guidance
+plugin.json                        portable Agent Plugins manifest
+.codex-plugin/plugin.json          Codex compatibility manifest and display metadata
+.agents/plugins/marketplace.json   Codex repository marketplace
+.claude-plugin/                    Claude Code plugin and marketplace manifests
 ```
 
 Based on the original artiboard by yulmucoffee, created for a multi-agent product team on claude.ai. Independent of and not endorsed by Anthropic or OpenAI. [MIT License](LICENSE).

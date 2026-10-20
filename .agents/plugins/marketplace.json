@@ -1,0 +1,20 @@
+{
+  "name": "artiboard-universal",
+  "interface": {
+    "displayName": "Artiboard Universal"
+  },
+  "plugins": [
+    {
+      "name": "artiboard",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

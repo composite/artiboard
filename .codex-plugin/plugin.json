@@ -1,0 +1,40 @@
+{
+  "name": "artiboard",
+  "version": "0.1.0",
+  "description": "Project task boards for people and coding agents, with Claude Artifacts or a persistent local webserver.",
+  "author": {
+    "name": "Composite",
+    "email": "ukjinplant@msn.com",
+    "url": "https://github.com/composite"
+  },
+  "homepage": "https://github.com/composite/artiboard",
+  "repository": "https://github.com/composite/artiboard",
+  "license": "MIT",
+  "keywords": [
+    "task-board",
+    "kanban",
+    "artifacts",
+    "codex",
+    "multi-agent",
+    "coordination",
+    "skills",
+    "sqlite"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Artiboard",
+    "shortDescription": "Shared project boards for people and coding agents",
+    "longDescription": "Manage tasks, dependencies, claims, threads and handoffs. Use Claude Artifacts when available, or a persistent Python and SQLite board on the same machine.",
+    "developerName": "Composite",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/composite/artiboard",
+    "defaultPrompt": [
+      "Use Artiboard to set up a persistent task board for this project.",
+      "Use Artiboard to find the next ready task and review its handoff."
+    ]
+  }
+}

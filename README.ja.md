@@ -1,251 +1,128 @@
-> This translation describes the original Artifact-only release. For the current local backend and general-agent setup, see [English](README.md) or [한국어](README.ko.md).
+# artiboard
 
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
-  <img alt="artiboard: ひとつのアーティファクトで、すべてのエージェントが同じボードを見る" src="docs/assets/banner-light.svg" width="100%">
-</picture>
-
-<br/>
-
-[![ci](https://github.com/yulmucoffee/artiboard/actions/workflows/ci.yml/badge.svg)](https://github.com/yulmucoffee/artiboard/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Claude Code](https://img.shields.io/badge/Claude_Code-skill-D97757)
-![claude.ai](https://img.shields.io/badge/claude.ai-artifact_+_db-2B6BEF)
+人とコーディングエージェントが共有するプロジェクト用タスクボードです。タスク、スレッド、お知らせ、ドキュメント・カンバン・依存グラフの各ビューを提供します。保存されたデータからコードが画面を描くため、通常の更新にモデル呼び出しは不要です。
 
 [English](README.md) · [한국어](README.ko.md) · **日本語** · [简体中文](README.zh-CN.md) · [Español](README.es.md)
 
-### 「タスクボードを作って」と言うだけで、チーム全員とすべての Claude エージェントが同じボードで動きます。
+| バックエンド | 必要なもの | 共同作業の範囲 |
+| --- | --- | --- |
+| Claude Artifact | 実際の `Artifact` と `ArtifactData` ツール | プラットフォームのアカウント・共有機能 |
+| ローカルWebサーバー | SQLiteを含むPython 3.10以上、最新のブラウザー | 同じコンピューターの人とエージェント、並行するGit worktree |
 
-**claude.ai のアーティファクトひとつがボードになります。タスク、スレッド、お知らせ、依存グラフまで。**<br/>
-画面はページのコードがアーティファクトのデータベースから直接描くので、トークンを使わずに常に最新です。<br/>
-エージェントはリポジトリに置いた短いルールに従います。一覧ではなくクエリで読み、書き込みは一度にまとめ、長いスレッドの代わりに要約を読みます。
-
-[デモ](#デモ) · [クイックスタート](#クイックスタート) · [使い方](#使い方) · [仕組み](#仕組み) · [トークン設計](#トークン設計) · [エージェント向け](FOR_AGENTS.md)
-
-</div>
-
-> [!TIP]
-> **セットアップは Claude に任せましょう。** Claude Code にこう貼り付けてください。
->
-> ```text
-> https://github.com/yulmucoffee/artiboard/blob/main/FOR_AGENTS.md に従って artiboard をセットアップして
-> ```
->
-> Claude がスキルを入れたあと、人数(1人、2人、3人、または任意の数)、仕事の分け方、ボードの言語、最初のタスクをどこから作るかを尋ねます。
-
-## デモ
-
-**[ライブデモを開く →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** レシピアプリを作る架空の3人チームと14個のタスクです。本物のボードページをページ内のサンプルデータで動かしているので、自由に触ってください。タスクを取る、スレッドに書く、検索、`j`/`k` で移動。数秒後にエージェントの更新が2件、ひとりでに届きます。 上部の English / 한국어 ボタンで、サンプルデータも含めてデモ全体を韓国語に切り替えられます。
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
-  <img alt="依存グラフのビュー" src="docs/assets/screens/graph-light.png" width="100%">
-</picture>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
-  <img alt="ドキュメントビュー" src="docs/assets/screens/doc-light.png" width="100%">
-</picture>
-
-<p align="center"><sub>ドキュメントビュー</sub></p>
-
-</td>
-<td width="50%" valign="top">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
-  <img alt="カンバンビュー" src="docs/assets/screens/kanban-light.png" width="100%">
-</picture>
-
-<p align="center"><sub>カンバン</sub></p>
-
-</td>
-</tr>
-</table>
-
-## なぜ artiboard か
-
-2人が同じコードベースでそれぞれ複数の Claude セッションを動かすと、難しいのはコードではありません。誰が何を取ったか、何が止まっているか、自分がいない間に何が変わったかを知ることです。チャットの履歴はセッションをまたげず、毎回すべての状況をプロンプトに貼るとコストがすぐに膨らみます。
-
-artiboard はその状況をチームで共有するライブなボードひとつにまとめ、エージェントにはそれを安く厳密に使う方法を与えます。
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### 🗂️ ボードひとつ、ビュー三つ
-
-上から読むドキュメントビュー、カンバン、残りの最長経路を強調する依存グラフ。検索、`j`/`k` キー、「前回から変わったもの」の印。ライトとダーク。
-
-</td>
-<td width="33%" valign="top">
-
-### 🤝 人とエージェントが一緒に
-
-一人ひとりに色があります。エージェントはバージョンを確かめてタスクを取るので、二つのエージェントが同じタスクを取ることはありません。決定、質問、引き継ぎはスレッドに、全員が知るべきことはお知らせに。
-
-</td>
-<td width="33%" valign="top">
-
-### 🪶 長く使っても安い
-
-画面を描くのはモデルではなくコードです。エージェントは必要な部分だけを読み、書き込みは一度にまとめます。プロジェクトが長くなるほど差が開きます。
-
-</td>
-</tr>
-</table>
+Codexなど、ファイルとシェルを使えるエージェントはローカル方式を利用できます。新規ボードでは両方のArtifactツールがあればArtifactを、なければローカルを選びます。既存ボードのバックエンドは維持し、移行は明示的な依頼で行います。ローカルの名前は**認証済みアカウントではなく表示ラベル**です。リモートチーム向けのホスティングサービスではありません。
 
 ## クイックスタート
 
-ボードは `Artifact` と `ArtifactData` ツールを使うので、claude.ai でサインインした Claude Code(デスクトップアプリまたは CLI)が必要です。
-
-**方法 A: Claude に任せる。** 上のボックスの文を貼り付けてください。Claude が [FOR_AGENTS.md](FOR_AGENTS.md) に従います。
-
-**方法 B: 自分だけ、すべてのプロジェクトで**
-
-```bash
-git clone --depth 1 https://github.com/yulmucoffee/artiboard.git "$HOME/.artiboard/src"
-```
-
-```bash
-mkdir -p "$HOME/.claude/skills/artiboard" && cp -R "$HOME/.artiboard/src/skills/artiboard/." "$HOME/.claude/skills/artiboard/"
-```
-
-プロジェクトで新しいセッションを開き、「このプロジェクトにタスクボードを作って」と言ってください。
-
-**方法 C: チームのリポジトリに**(リポジトリのルートで実行してコミット)
-
-```bash
-mkdir -p .claude/skills/artiboard && cp -R "$HOME/.artiboard/src/skills/artiboard/." .claude/skills/artiboard/
-```
-
-アップグレードするときは `git -C "$HOME/.artiboard/src" pull --ff-only` を実行してから、同じコピーコマンドをもう一度実行します。Windows PowerShell では [FOR_AGENTS.md](FOR_AGENTS.md#step-2-install-the-skill) のコマンドを使ってください。
-
-<details>
-<summary><b>Claude Code プラグインを使う場合</b></summary>
+コーディングエージェントに依頼します。
 
 ```text
-/plugin marketplace add yulmucoffee/artiboard
-/plugin install artiboard@artiboard
+このcheckoutのskills/artiboard/SKILL.mdを読み、このプロジェクトにタスクボードを作って。
+ArtifactツールがなければローカルWebサーバーを使って。
 ```
 
-スキル名は `/artiboard:artiboard` になります。
+## インストール
 
-</details>
+方式を一つ選びます。Skills CLIにはNode.js/npmが必要です。既定ではプロジェクト内にインストールします。対象プロジェクトで、このcheckoutの絶対パスを指定します。
+
+```bash
+npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex
+```
+
+使うエージェント名だけ残してください。`--list`で検出結果を確認でき、個人用のグローバルインストールを選ぶ場合は`--global`を追加します。Agent Skillsのメタデータ（`license`、`compatibility`、作者・バージョン・出典）、Codexの表示情報、実行コード、アセット、参考文書、MITライセンスを同梱しています。npmへのパッケージ公開は不要です。
+
+forkの`universal`ブランチをリモートに公開した後は、GitHubからインストールできます。
+
+```bash
+npx skills add https://github.com/composite/artiboard/tree/universal --skill artiboard --agent codex
+```
+
+push前はローカルcheckoutのコマンドを使ってください。refのない`composite/artiboard`はデフォルトブランチを使うため、元の版が入る可能性があります。
+
+Codexプラグインとして使う場合は、`codex plugin`対応CLIで実行します。
+
+```bash
+codex plugin marketplace add /absolute/path/to/artiboard
+codex plugin add artiboard@artiboard-universal
+```
+
+現在のCodexユーザーのプラグイン設定に登録・インストールします。プロジェクト内だけのスキルにはSkills CLIを使います。デスクトップアプリではプラグインディレクトリの**Artiboard Universal**から**Artiboard**をインストールできます。新しいローカルソースが表示されなければ再起動してください。ブランチ公開後は`codex plugin marketplace add composite/artiboard --ref universal`でも登録できます。
+
+Claude Codeでは元の[yulmucoffee/artiboard](https://github.com/yulmucoffee/artiboard)を使ってください。
+
+```bash
+claude plugin marketplace add yulmucoffee/artiboard --scope project
+claude plugin install artiboard@artiboard --scope project
+```
+
+Claudeのマニフェストは元のまま維持します。このforkのCodexマーケットプレイス名は`artiboard-universal`で、元のClaudeプラグインを置き換えません。同じエージェントでスキルを重複して有効にしないでください。cloneやソース編集だけでグローバルインストールされることはありません。手順と更新方法は[エージェント向けガイド](FOR_AGENTS.md)を参照してください。
+
+## ローカルボードの起動
+
+このcheckoutから空のボードを起動する例です。タイトルとユーザーIDを選びます。
+
+```bash
+python3 skills/artiboard/scripts/local_board.py init --title "My project" --person ana --lang en
+python3 skills/artiboard/scripts/local_board.py serve --port 8765
+```
+
+Pythonの起動方法に応じて`python`や`py -3`に置き換えます。サーバーが表示するURLを開いてください。Ctrl-Cで停止してもデータは残り、同じコマンドで再開できます。ポートが使用中なら`--port 0`を使います。バックグラウンドサービスはインストールしません。
+
+既定のDBはメインGit checkoutの`.artiboard/board.sqlite3`で、リンクされたworktreeも共有します。Git外では現在のディレクトリが基準です。別の場所はサブコマンドの前に`--db <path>`で指定し、解決済みの共有パスをプロジェクトのルールに記録してください。`.artiboard/`はGitの管理対象から外します。サーバーはボードとアダプターだけを配信し、`127.0.0.1`にのみバインドしてクロスサイト要求を拒否します。同じコンピューターのユーザーとプロセスは信頼範囲に含まれます。
+
+エージェントはサーバーなしでも同じDBを読み書きできます。
+
+```bash
+python3 skills/artiboard/scripts/local_board.py request <<'JSON'
+{"action":"query","collection":"tasks","where":[["status","==","todo"],["waitingOn","==",[]]],"limit":20}
+JSON
+```
+
+初期データ、バージョン付きバッチ、バックアップは[ローカルガイド](skills/artiboard/references/local.md)、Claudeでの公開と共有は[Artifactガイド](skills/artiboard/references/artifact.md)を参照してください。
 
 ## 使い方
 
-どんな言い方でも、どの言語でも構いません。
-
-| こう言うと | こうなります |
+| 依頼 | 動作 |
 | --- | --- |
-| 「このプロジェクトにタスクボードを作って」 | **setup**: 人数、分け方、言語、タスクの出どころを尋ねます。ドキュメントからタスクを起こして確認を取り、ボードを公開してデータを入れ、`docs/artiboard.md` と `CLAUDE.md` の短い案内を書きます。 |
-| 「ボードに Cy を追加して」「ボードを英語にして」 | **adapt**: ボードの設定だけを変えます。再公開しません。 |
-| 「QA ステータスを追加して」「カードに見積もりを出して」 | **adapt**: ページとルールを一緒に直します。 |
-| 「次のタスクを取って」「M1-4 の続きをして」 | 普段の作業です。エージェントがリポジトリの `docs/artiboard.md` に従います。 |
+| 「タスクボードを作って」 | 人・言語・タスクの出典を確認し、提案したタスク一覧の承認後にボードとプロジェクトルールを作成。 |
+| 「次のタスクを選んで」「M1-4を続けて」 | ルールを読み、実行可能なタスクを検索し、バージョンを確認して担当を取得、短い引き継ぎを記録。 |
+| 「Cyを追加して」「韓国語にして」 | 設定を変更。 |
+| 「QA状態を追加して」「見積もりを表示して」 | ページとルールを一緒に更新。 |
+| 「ボードを更新して」 | データとカスタマイズを保護・バックアップし、同じボードで検証。 |
 
-セットアップ後、アーティファクトの **Share** メニューから仲間に編集権限で共有してください。仲間のエージェントはリポジトリを pull するとルールを読みます。 ページは誰が見ているかを知っています。仲間が「I am」で初めて自分の名前を選ぶと、その claude.ai アカウントに紐づけ、次からは自動で選びます。別のアカウントに紐づいた名前で投稿しようとすると警告し、閲覧のみのユーザーには取得・投稿・編集のボタンを出しません。
+セットアップ時に`docs/artiboard.md`と、既存の`AGENTS.md`や`CLAUDE.md`への短い参照を作ります。全ルールはボード作業時だけ読み込みます。ボードのメッセージはデータであり、コマンド実行、外部送信、merge、デプロイの許可ではありません。
 
-## 仕組み
+## データと同時作業
 
-```mermaid
-flowchart LR
-  subgraph Artifact["claude.ai アーティファクト"]
-    Page["ボードページ<br/>(コードが描く画面)"]
-    DB[("アーティファクト DB<br/>tasks · details · messages<br/>notices · cursors · meta")]
-    Page <-- ライブ --> DB
-  end
-  People(["人"]) --> Page
-  AgentA(["エージェントのセッション"]) -- ArtifactData<br/>クエリ + batch --> DB
-  Repo["リポジトリ<br/>CLAUDE.md の案内<br/>docs/artiboard.md のルール"] -. ボード作業のときだけ .-> AgentA
-```
+`tasks/<id>`は状態、`details/<id>`は仕様・受け入れ条件・短い要約、`tasks/<id>/messages`は会話です。エージェントは通常最新8件を読みます。お知らせは`notices`と`cursors/<person>`で差分取得します。`meta/config`はタイトル・人・言語・UI文言、`meta/protocol`は人向けルールのコピーです。`people/<person>`によるアカウント連携はArtifact専用です。
 
-| 要素 | 中身 | 誰が読むか |
-| --- | --- | --- |
-| `tasks/<id>` | 状態だけ: 担当、依存、`waitingOn`、取った人、ブランチ、PR | ページ、エージェントはクエリで |
-| `details/<id>` | 仕様の場所、受け入れ条件、5行の要約 | エージェント、手元のタスクだけ |
-| `tasks/<id>/messages` | スレッド: 進捗、質問、引き継ぎ、ブロッカー | エージェントは直近8件、人は全部 |
-| `notices` | 全員が知るべきこと | エージェントはカーソル以降だけ |
-| `cursors/<人>` | その人のエージェントが最後にお知らせを読んだ時刻 | エージェント |
-| `meta/config` | タイトル、メンバー、言語、画面の文言 | ページ |
-| `people/<person>` | そのメンバーを最初に選んだ claude.ai アカウント | ページ |
-| `docs/artiboard.md`(リポジトリ) | エージェントのルール | ボードを使うセッションのエージェントだけ |
+担当取得にはバージョン付きの原子的バッチを使い、競合するとバッチ全体を取り消します。ローカルではCLIとブラウザーがSQLiteトランザクションを共有し、画面を閉じても依存関係の準備状態を再計算します。Artifactではエージェントが依存関係を更新し、開いたページが補正します。元のArtifact UIの担当ボタンは読み取り後の更新なので、同方式の原子的取得保証はバージョン付きエージェントバッチに適用されます。
 
-## トークン設計
+ビュー、検索、`j`/`k`・`1`/`2`/`3`キー、新着表示はコードが処理します。ローカルブラウザー設定はDBごとに分離し、切断時は通知してオフライン書き込みを予約しません。組み込みUI言語は英語と韓国語です。日本語などは`meta/config.strings`で上書きできます。設定は`title`、`subtitle`、`milestone`、`lang`、`people`（`id`、任意の`name`と`role`）、`strings`、`footer`に対応し、状態を変える場合も`todo`と`done`の意味を保ちます。
 
-| ルール | 効果 |
-| --- | --- |
-| 画面はコードが描く | ビュー、グラフ、件数、着手可否、「新着」印にモデルのトークンは要りません。人数が増えても同じです。 |
-| ルールはリポジトリに、必要なときだけ | どのセッションも3行の案内だけを負担します。ルールを読むのはボードを使うセッションだけ。リポジトリの文章はレビューされているので信頼でき、誰でも書けるボードの文章とは違います。 |
-| 一覧ではなくクエリ | 着手できる仕事は1回のクエリ(`status == todo`、`waitingOn == []`)で見つかります。お知らせはカーソル以降の差分だけ。 |
-| ドキュメントは小さく | タスクのドキュメントは状態だけ。長い文章はタスクひとつのときだけ開きます。 |
-| スレッドより要約 | 引き継ぎで5行の要約を書き直すので、次の人は古いメッセージを飛ばせます。 |
-| 1アクションに1 batch | タスクを取るのは1回の呼び出しです。タスク、メッセージ、カーソルをバージョン確認つきで。 |
-| 自分で直るデータ | 誰かがボードを開いていれば、ページが `waitingOn` を正します。エージェントが帳簿合わせに呼び出しを使うことはまれです。 |
+## デモと開発
 
-## リファレンス
-
-<details>
-<summary><b><code>meta/config</code> のキー</b></summary>
-
-| キー | 例 | 意味 |
-| --- | --- | --- |
-| `title` | `"Acme Board"` | ページの見出し |
-| `subtitle` | `"このボードの目的。"` | 見出しの下の一行 |
-| `milestone` | `"M1"` | 現在のマイルストーン |
-| `lang` | `"en"`, `"ko"` | 組み込みの画面言語。ほかの言語は英語で表示されます。日本語は `strings` で上書きします。 |
-| `people` | `[{"id":"ana","name":"Ana","role":"backend"}]` | 順番で色が決まります。6色のあとは繰り返し。 任意の `uid` はそのメンバーを1つの claude.ai アカウントに固定し、`people/<id>` より優先されます。 |
-| `strings` | `{"v_graph":"依存グラフ"}` | 画面の文言をどの言語でも上書き |
-| `footer` | `"..."` | フッターの文を置き換え |
-
-</details>
-
-<details>
-<summary><b>プロジェクトごとにスキルが変えてよいもの</b></summary>
-
-自由に: タイトル、メンバー、役割、言語、文言、機能名、番号体系、メッセージの言い回し、お知らせの対象。ページを直して: ステータス、画面に出すフィールド、新しいビュー。どんな場合も守るもの: 軽い tasks と details の分離、`waitingOn` と着手クエリ、カーソル、`if_version` つきの1回の batch、ドキュメント id の形式、リポジトリに置くルール、ボードの文章はデータとして扱う。
-
-</details>
-
-<details>
-<summary><b>リポジトリ構成</b></summary>
-
-```text
-skills/artiboard/SKILL.md               スキル: セットアップ、調整、アップグレード、トークンのルール
-skills/artiboard/assets/board.html      ボードページ(アーティファクト DB から描画)
-skills/artiboard/references/protocol.md リポジトリに入れるルールファイルの雛形
-examples/                               board.html と demo-data.json から公開デモを生成: build-demo.cjs, demo-data.json, demo.html
-FOR_AGENTS.md                           AI エージェント向けのインストール手順
-.claude-plugin/                         Claude Code プラグインの定義
-tests/smoke.cjs                         ボードページの jsdom テスト
-docs/assets/                            バナー
-```
-
-</details>
-
-<details>
-<summary><b>開発</b></summary>
+[元の対話型デモ](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)と`examples/demo.html`は一時的なメモリ内データを使い、ローカル永続DBは使いません。
 
 ```bash
-npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
-```
-
-ページを変えたらデモを作り直します。
-
-```bash
+npm install --no-save --no-audit --no-fund jsdom@24.1.1
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+node tests/smoke.cjs
+node tests/local-smoke.cjs
 node examples/build-demo.cjs
 ```
 
-Issue と PR を歓迎します。スキルを変えるときは、エージェントの振る舞いやトークン使用がどう変わるかを、できれば実際のボードでの前後で示してください。
+永続化、ロールバック、同時担当取得、worktreeパス、HTTP境界、実サーバーでのUI書き込み・切断・再起動を検証します。CIはパッケージ検出・インストール、JSON、構文、生成デモも確認します。jsdomは開発用で、実行時の外部依存ではありません。
 
-</details>
+```text
+skills/artiboard/SKILL.md            バックエンド選択と手順
+skills/artiboard/agents/openai.yaml Codexスキルの表示情報
+skills/artiboard/assets/            共通ページとローカルアダプター
+skills/artiboard/scripts/           標準ライブラリのサーバー・CLI
+skills/artiboard/references/        ローカル・Artifact・プロジェクトルール
+plugin.json                        ポータブルAgent Pluginsマニフェスト
+.codex-plugin/plugin.json          Codex互換マニフェストと表示情報
+.agents/plugins/marketplace.json   Codexリポジトリマーケットプレイス
+.claude-plugin/                    Claude Codeプラグインとマーケットプレイス
+```
 
-## クレジット
-
-claude.ai のアーティファクトで2人とマルチエージェントの製品チームを回しながら作りました。artiboard は独立したプロジェクトで、Anthropic との提携や保証はありません。[MIT License](LICENSE).
+yulmucoffeeの元のartiboardを基に拡張しています。Anthropic・OpenAIとは提携しておらず、両社の推奨を意味しません。[MITライセンス](LICENSE)。

@@ -1,6 +1,13 @@
 ---
 name: artiboard
 description: Set up, adapt, upgrade or work with a project task board shared by people and coding agents. Use for artiboard, agent-readable kanban, task dependencies, claims, handoffs and notices, including "작업 보드 만들어줘" or "タスクボードを作って". Supports Claude Artifacts when their tools exist and a persistent local webserver otherwise. Not for unrelated UI design or replacing an existing issue tracker without a request.
+license: MIT
+compatibility: Local mode requires filesystem and shell access, Python 3.10+ with SQLite, and a modern browser. Artifact mode requires actual Artifact and ArtifactData tools.
+metadata:
+  author: Composite
+  version: "0.1.0"
+  repository: https://github.com/composite/artiboard
+  upstream: https://github.com/yulmucoffee/artiboard
 ---
 
 # artiboard
@@ -15,7 +22,7 @@ First look for an existing artiboard block in the project's `AGENTS.md`, `CLAUDE
 | --- | --- |
 | User chose a backend | Use it; if unavailable, explain the missing capability before changing it. |
 | New board and actual `Artifact` + `ArtifactData` tools are available | Use the [Artifact backend](references/artifact.md). |
-| New board with filesystem, shell and Python 3.10+ | Use the [local backend](references/local.md). This works with Codex, Claude Code and other coding agents. |
+| New board with filesystem, shell and Python 3.10+ | Use the [local backend](references/local.md). This works with Codex and other coding agents. |
 | Neither route is usable | Prepare the project files/draft within scope and explain what is needed to run it. Do not claim a live board. |
 
 Choose **setup**, **adapt**, **upgrade** or **daily work** from the request. Daily work follows the installed project protocol, not the setup questionnaire. Do not introduce an alternative cloud service, paid dependency or public deployment to solve missing Artifact tools.

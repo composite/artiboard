@@ -1,251 +1,128 @@
-> This translation describes the original Artifact-only release. For the current local backend and general-agent setup, see [English](README.md) or [한국어](README.ko.md).
+# artiboard
 
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
-  <img alt="artiboard：一个 artifact，所有 agent 看同一块看板" src="docs/assets/banner-light.svg" width="100%">
-</picture>
-
-<br/>
-
-[![ci](https://github.com/yulmucoffee/artiboard/actions/workflows/ci.yml/badge.svg)](https://github.com/yulmucoffee/artiboard/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Claude Code](https://img.shields.io/badge/Claude_Code-skill-D97757)
-![claude.ai](https://img.shields.io/badge/claude.ai-artifact_+_db-2B6BEF)
+供人与编程 agent 共同使用的项目任务看板，包含任务、讨论串、公告，以及文档、看板和依赖图视图。页面由代码根据持久化数据渲染，日常刷新无需调用模型。
 
 [English](README.md) · [한국어](README.ko.md) · [日本語](README.ja.md) · **简体中文** · [Español](README.es.md)
 
-### 说一句"建一个任务看板"，整个团队和每个 Claude agent 就在同一块看板上工作。
+| 后端 | 要求 | 协作范围 |
+| --- | --- | --- |
+| Claude Artifact | 实际可用的 `Artifact` 和 `ArtifactData` 工具 | 平台账号与共享功能 |
+| 本地 Web 服务器 | 含 SQLite 的 Python 3.10+、现代浏览器 | 同一台电脑上的用户与 agent，包括并行 Git worktree |
 
-**一个 claude.ai artifact 就是看板：任务、讨论串、公告，还有依赖图。**<br/>
-页面代码直接从 artifact 的数据库绘制一切，所以无需花费任何 token 就始终是最新的。<br/>
-Agent 遵循放在你仓库里的几条精简规则：用查询代替全量读取，每个动作一次批量写入，用摘要代替冗长的讨论串。
-
-[演示](#演示) · [快速开始](#快速开始) · [使用](#使用) · [工作原理](#工作原理) · [Token 设计](#token-设计) · [给 agent 的说明](FOR_AGENTS.md)
-
-</div>
-
-> [!TIP]
-> **让 Claude 帮你安装。** 把下面这句粘贴到 Claude Code：
->
-> ```text
-> 按照 https://github.com/yulmucoffee/artiboard/blob/main/FOR_AGENTS.md 帮我安装 artiboard
-> ```
->
-> Claude 会先安装这个 skill，然后询问人数（1 人、2 人、3 人或任意人数）、分工方式、看板语言，以及第一批任务从哪里来。
-
-## 演示
-
-**[打开在线演示 →](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)** 一个正在开发菜谱应用的虚构三人团队，共 14 个任务。它用页面内的示例数据运行真实的看板页面，随便点：认领任务、在讨论串里留言、搜索、按 `j`/`k` 移动。几秒后会自动收到两条 agent 更新。顶部的 English / 한국어 按钮可以把整个演示（包括示例数据）切换成韩语。
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/graph-dark.png">
-  <img alt="依赖图视图" src="docs/assets/screens/graph-light.png" width="100%">
-</picture>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/doc-dark.png">
-  <img alt="文档视图" src="docs/assets/screens/doc-light.png" width="100%">
-</picture>
-
-<p align="center"><sub>文档视图</sub></p>
-
-</td>
-<td width="50%" valign="top">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/kanban-dark.png">
-  <img alt="看板视图" src="docs/assets/screens/kanban-light.png" width="100%">
-</picture>
-
-<p align="center"><sub>看板</sub></p>
-
-</td>
-</tr>
-</table>
-
-## 为什么是 artiboard
-
-当两个人在同一个代码库里各自运行好几个 Claude 会话时，难的不是代码，而是知道谁拿了什么、什么被卡住了、自己不在时发生了什么变化。聊天记录无法跨会话传递，而每次把全部状态贴进提示词，成本很快就会失控。
-
-artiboard 把这些状态集中到团队共享的一块实时看板上，并给 agent 一套便宜而严格的使用方式。
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### 🗂️ 一块看板，三种视图
-
-从上往下读的文档视图、看板视图，以及突出最长剩余链路的依赖图。支持搜索、`j`/`k` 快捷键和"上次查看后的变化"标记。浅色与深色主题。
-
-</td>
-<td width="33%" valign="top">
-
-### 🤝 人与 agent 协同
-
-每个人有自己的颜色。Agent 通过带版本校验的写入认领任务，两个 agent 不会抢到同一个任务。决定、问题和交接写在讨论串里，所有人都要知道的事写在公告里。
-
-</td>
-<td width="33%" valign="top">
-
-### 🪶 长期使用也便宜
-
-视图由代码绘制，而不是模型。Agent 只读取需要的部分，写入一次批量完成。项目越长，差距越大。
-
-</td>
-</tr>
-</table>
+Codex 等能够访问文件和 shell 的 agent 可使用本地后端。新看板在两个 Artifact 工具均可用时默认选择 Artifact，否则选择本地。现有看板保留原后端，迁移需要明确请求。本地选择的姓名是**显示标签，不是经过认证的账号**。本地模式不提供跨电脑团队托管。
 
 ## 快速开始
 
-看板使用 `Artifact` 和 `ArtifactData` 工具，因此需要用 claude.ai 登录的 Claude Code（桌面应用或 CLI）。
-
-**方式 A：交给 Claude。** 使用上面框里的那句话。Claude 会按照 [FOR_AGENTS.md](FOR_AGENTS.md) 操作。
-
-**方式 B：只给我自己，在所有项目中使用**
-
-```bash
-git clone --depth 1 https://github.com/yulmucoffee/artiboard.git "$HOME/.artiboard/src"
-```
-
-```bash
-mkdir -p "$HOME/.claude/skills/artiboard" && cp -R "$HOME/.artiboard/src/skills/artiboard/." "$HOME/.claude/skills/artiboard/"
-```
-
-在项目中打开新会话，说"为这个项目建一个任务看板"。
-
-**方式 C：给团队仓库**（在仓库根目录运行，然后提交）
-
-```bash
-mkdir -p .claude/skills/artiboard && cp -R "$HOME/.artiboard/src/skills/artiboard/." .claude/skills/artiboard/
-```
-
-升级时，先运行 `git -C "$HOME/.artiboard/src" pull --ff-only`，再运行同样的复制命令。在 Windows PowerShell 中，请使用 [FOR_AGENTS.md](FOR_AGENTS.md#step-2-install-the-skill) 里的命令。
-
-<details>
-<summary><b>更喜欢 Claude Code 插件？</b></summary>
+向编程 agent 提出请求：
 
 ```text
-/plugin marketplace add yulmucoffee/artiboard
-/plugin install artiboard@artiboard
+读取这个 checkout 中的 skills/artiboard/SKILL.md，为本项目创建任务看板。
+如果没有 Artifact 工具，就使用本地 Web 服务器。
 ```
 
-之后 skill 名称为 `/artiboard:artiboard`。
+## 安装
 
-</details>
+选择一种安装方式。Skills CLI 需要 Node.js/npm，默认安装到项目中。在目标项目目录中指定此 checkout 的绝对路径：
+
+```bash
+npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex
+```
+
+仅保留实际使用的 agent 名称。加上 `--list` 可预览发现结果，明确选择个人全局安装时才加 `--global`。包内含 Agent Skills 元数据（`license`、`compatibility`、作者、版本、来源）、Codex 显示信息、运行代码、资源、参考文档和 MIT 许可证，无需发布 npm 包。
+
+将 fork 的 `universal` 分支发布到远程后，可以从 GitHub 安装：
+
+```bash
+npx skills add https://github.com/composite/artiboard/tree/universal --skill artiboard --agent codex
+```
+
+push 前请使用本地 checkout 命令。不指定 ref 的 `composite/artiboard` 使用默认分支，可能安装原版。
+
+若选择 Codex 插件，请使用支持 `codex plugin` 的 CLI：
+
+```bash
+codex plugin marketplace add /absolute/path/to/artiboard
+codex plugin add artiboard@artiboard-universal
+```
+
+这些命令会向当前 Codex 用户的插件配置注册市场并安装插件。仅安装项目级 skill 时使用 Skills CLI。桌面应用可在插件目录的 **Artiboard Universal** 中安装 **Artiboard**；若看不到新增本地来源，请重启应用。分支发布后，也可用 `codex plugin marketplace add composite/artiboard --ref universal` 注册。
+
+Claude Code 请使用原版 [yulmucoffee/artiboard](https://github.com/yulmucoffee/artiboard)：
+
+```bash
+claude plugin marketplace add yulmucoffee/artiboard --scope project
+claude plugin install artiboard@artiboard --scope project
+```
+
+Claude 清单保持原版不变。此 fork 的 Codex 市场名为 `artiboard-universal`，不会替换原版 Claude 插件。避免在同一 agent 中重复启用 skill。clone 或编辑源码不会自动全局安装。设置与升级规则见[agent 指南](FOR_AGENTS.md)。
+
+## 运行本地看板
+
+从此 checkout 启动空看板，先选定标题和用户 ID：
+
+```bash
+python3 skills/artiboard/scripts/local_board.py init --title "My project" --person ana --lang en
+python3 skills/artiboard/scripts/local_board.py serve --port 8765
+```
+
+按环境将 `python3` 换成 `python` 或 `py -3`。打开服务器输出的 URL。Ctrl-C 停止后数据仍保留，使用相同命令即可重新启动。端口占用时用 `--port 0`。不会安装后台服务。
+
+默认 DB 为主 Git checkout 的 `.artiboard/board.sqlite3`，关联的 worktree 共享该文件；Git 之外以当前目录为准。其他位置通过子命令之前的 `--db <path>` 指定，并将解析后的共享路径写入项目规则。请将 `.artiboard/` 排除在 Git 之外。服务器只提供看板页面和适配器，绑定 `127.0.0.1`，拒绝跨站请求。同机用户与进程属于信任范围。
+
+无需启动服务器，agent 也能读写同一 DB：
+
+```bash
+python3 skills/artiboard/scripts/local_board.py request <<'JSON'
+{"action":"query","collection":"tasks","where":[["status","==","todo"],["waitingOn","==",[]]],"limit":20}
+JSON
+```
+
+初始化数据、版本检查、备份与运行管理见[本地后端指南](skills/artiboard/references/local.md)；Claude 工具的发布与共享见[Artifact 指南](skills/artiboard/references/artifact.md)。
 
 ## 使用
 
-用任何说法、任何语言直接说就行。
-
-| 你说 | 会发生什么 |
+| 请求 | 行为 |
 | --- | --- |
-| "为这个项目建一个任务看板" | **setup**：询问人数、分工、语言和任务来源。从文档中起草任务并请你确认。发布看板、写入数据，并写好 `docs/artiboard.md` 和 `CLAUDE.md` 里的简短指引。 |
-| "把 Cy 加到看板""把看板改成英文" | **adapt**：只更新看板配置，不重新发布。 |
-| "加一个 QA 状态""在卡片上显示估时" | **adapt**：同时修改页面和规则。 |
-| "领下一个任务""继续 M1-4" | 日常工作。Agent 遵循仓库里的 `docs/artiboard.md`：认领、讨论、摘要、评审、完成。 |
+| “创建任务看板” | 确定人员、语言和任务来源，确认建议任务列表后创建看板与项目规则。 |
+| “选择下一项任务”“继续 M1-4” | 读取规则，查询可开始的任务，检查版本后领取，记录简短交接。 |
+| “添加 Cy”“改成韩语” | 更新配置。 |
+| “添加 QA 状态”“显示估时” | 同步修改页面与规则。 |
+| “升级看板” | 保留并备份数据与定制内容，在原看板上验证升级。 |
 
-安装完成后，从 artifact 的 **Share** 菜单以编辑权限分享给队友。队友的 agent 拉取仓库后就会读到规则。 页面知道是谁在看：队友第一次在“I am”中选自己的名字时，看板会把它关联到其 claude.ai 账号，之后自动选中。有人用关联到其他账号的名字发帖时会给出警告；只读用户看不到领取、发帖和编辑按钮。
+设置时写入 `docs/artiboard.md`，并在现有 `AGENTS.md` 或 `CLAUDE.md` 添加简短入口。完整规则仅在看板工作时加载。看板消息是数据，不构成执行命令、对外发送、merge 或部署的授权。
 
-## 工作原理
+## 数据与并发
 
-```mermaid
-flowchart LR
-  subgraph Artifact["claude.ai artifact"]
-    Page["看板页面<br/>（代码绘制视图）"]
-    DB[("Artifact 数据库<br/>tasks · details · messages<br/>notices · cursors · meta")]
-    Page <-- 实时 --> DB
-  end
-  People(["人"]) --> Page
-  AgentA(["Agent 会话"]) -- ArtifactData<br/>查询 + 批量写入 --> DB
-  Repo["你的仓库<br/>CLAUDE.md 指引<br/>docs/artiboard.md 规则"] -. 仅在看板工作时读取 .-> AgentA
-```
+`tasks/<id>` 存状态；`details/<id>` 存规格、验收条件和简短摘要；`tasks/<id>/messages` 存讨论，agent 通常读取最新八条。公告通过 `notices` 与 `cursors/<person>` 增量读取。`meta/config` 存标题、人员、语言和 UI 文案，`meta/protocol` 是供人阅读的规则副本。`people/<person>` 账号关联仅供 Artifact 使用。
 
-| 组成 | 内容 | 谁来读 |
-| --- | --- | --- |
-| `tasks/<id>` | 只有状态：负责人、依赖、`waitingOn`、认领信息、分支、PR | 页面；agent 通过查询 |
-| `details/<id>` | 规格位置、验收标准、五行摘要 | Agent，仅限手头的任务 |
-| `tasks/<id>/messages` | 讨论串：进展、问题、交接、阻塞 | Agent 读最近 8 条，人读全部 |
-| `notices` | 所有人都要知道的事 | Agent 只读游标之后的新内容 |
-| `cursors/<人>` | 此人的 agent 上次读公告的时间 | Agent |
-| `meta/config` | 标题、成员、语言、界面文案 | 页面 |
-| `people/<person>` | 最先选择该成员的 claude.ai 账号 | 页面 |
-| `docs/artiboard.md`（仓库） | Agent 规则 | 仅在使用看板的会话中由 agent 读取 |
+领取任务使用带版本条件的原子批处理，冲突会回滚整批。本地 CLI 与浏览器共享 SQLite 事务，即使页面关闭也会重新计算依赖就绪状态。Artifact 由 agent 更新依赖，打开的页面进行修正。原 Artifact UI 的领取按钮采用先读后写，因此该后端的原子领取保证适用于带版本条件的 agent 批处理。
 
-## Token 设计
+视图、搜索、快捷键（`j`/`k`、`1`/`2`/`3`）及新消息标记均由代码处理。本地浏览器偏好按 DB 隔离；断开连接时提示，不排队保存离线写入。内置 UI 语言为英语和韩语，中文等语言可通过 `meta/config.strings` 覆盖。配置支持 `title`、`subtitle`、`milestone`、`lang`、`people`（`id`，可选 `name` 与 `role`）、`strings`、`footer`；定制状态时保留 `todo` 与 `done` 的语义。
 
-| 规则 | 效果 |
-| --- | --- |
-| 代码绘制看板 | 视图、图表、计数、可领取状态和"新"标记不消耗任何模型 token，团队再大也一样。 |
-| 规则放在仓库里，按需加载 | 每个会话只承担三行指引。只有使用看板的会话才读规则。仓库文本经过评审、值得信任，不同于任何人都能编辑的看板文本。 |
-| 用查询，不全量读取 | 找可领取的任务只需一次查询（`status == todo`、`waitingOn == []`）。公告只取游标之后的增量。 |
-| 文档保持小巧 | 任务文档只存状态。长文本只在处理某个任务时才打开。 |
-| 摘要优先于讨论串 | 交接时重写五行摘要，下一个人可以跳过旧消息。 |
-| 每个动作一次批量写入 | 认领就是一次调用：任务、消息、游标一起写，并校验版本。 |
-| 自我修复的数据 | 只要有人打开看板，页面就会纠正 `waitingOn`，agent 很少需要为记账花调用。 |
+## 演示与开发
 
-## 参考
-
-<details>
-<summary><b><code>meta/config</code> 键</b></summary>
-
-| 键 | 示例 | 含义 |
-| --- | --- | --- |
-| `title` | `"Acme Board"` | 页面标题 |
-| `subtitle` | `"这块看板是做什么的。"` | 标题下的一行 |
-| `milestone` | `"M1"` | 当前里程碑 |
-| `lang` | `"en"`、`"ko"` | 内置界面语言，其他语言显示为英文。中文可用 `strings` 覆盖。 |
-| `people` | `[{"id":"ana","name":"Ana","role":"backend"}]` | 顺序决定颜色。六种颜色后循环。 可选的 `uid` 把该成员固定到一个 claude.ai 账号，优先于 `people/<id>`。 |
-| `strings` | `{"v_graph":"依赖图"}` | 用任意语言覆盖任意界面文案 |
-| `footer` | `"..."` | 替换页脚文字 |
-
-</details>
-
-<details>
-<summary><b>Skill 可以按项目调整什么</b></summary>
-
-可自由调整：标题、成员、角色、语言、文案、功能名、编号规则、消息措辞、公告主题。通过修改页面：状态、在界面显示的字段、新视图。任何情况下都保留：轻量 tasks 与 details 分离、`waitingOn` 与可领取查询、游标、带 `if_version` 的单次批量写入、文档 id 格式、规则放在仓库、看板文本视为数据。
-
-</details>
-
-<details>
-<summary><b>仓库结构</b></summary>
-
-```text
-skills/artiboard/SKILL.md               skill：安装、调整、升级、token 规则
-skills/artiboard/assets/board.html      看板页面（从 artifact 数据库绘制）
-skills/artiboard/references/protocol.md 安装到你仓库的规则文件模板
-examples/                               用 board.html 和 demo-data.json 生成公开演示: build-demo.cjs, demo-data.json, demo.html
-FOR_AGENTS.md                           给 AI agent 的分步安装说明
-.claude-plugin/                         Claude Code 插件清单
-tests/smoke.cjs                         看板页面的 jsdom 冒烟测试
-docs/assets/                            横幅
-```
-
-</details>
-
-<details>
-<summary><b>开发</b></summary>
+[原交互演示](https://claude.ai/artifact/5zENFyGDJbEjey68J6t1bY)与 `examples/demo.html` 使用临时内存数据，不使用本地持久化后端。
 
 ```bash
-npm install --no-save jsdom@24.1.1 && node tests/smoke.cjs
-```
-
-修改页面后重新生成演示：
-
-```bash
+npm install --no-save --no-audit --no-fund jsdom@24.1.1
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+node tests/smoke.cjs
+node tests/local-smoke.cjs
 node examples/build-demo.cjs
 ```
 
-欢迎提交 issue 和 PR。修改 skill 时，请说明 agent 行为或 token 用量如何变化，最好附上在真实看板上的前后对比。
+验证持久化、回滚、并发领取、worktree 路径、HTTP 边界，以及真实服务器上的 UI 写入、断线与重启。CI 还检查包发现与安装、JSON、脚本语法和演示是否同步。jsdom 仅用于开发验证，运行看板不需要外部包。
 
-</details>
+```text
+skills/artiboard/SKILL.md            后端选择与工作流程
+skills/artiboard/agents/openai.yaml Codex skill 显示信息
+skills/artiboard/assets/            共享页面与本地适配器
+skills/artiboard/scripts/           标准库服务器与 CLI
+skills/artiboard/references/        本地、Artifact 与项目规则指南
+plugin.json                        通用 Agent Plugins 清单
+.codex-plugin/plugin.json          Codex 兼容清单与显示信息
+.agents/plugins/marketplace.json   Codex 仓库市场
+.claude-plugin/                    Claude Code 插件与市场清单
+```
 
-## 致谢
-
-在用 claude.ai artifact 运作一个两人、多 agent 的产品团队时打造。artiboard 是独立项目，与 Anthropic 无关联，也未获其背书。[MIT License](LICENSE).
+基于 yulmucoffee 的原版 artiboard 扩展。与 Anthropic、OpenAI 无隶属关系，也不代表其认可。[MIT 许可证](LICENSE)。

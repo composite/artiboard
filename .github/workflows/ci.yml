@@ -1,7 +1,7 @@
 name: ci
 on:
   push:
-    branches: [main]
+    branches: [main, universal]
   pull_request:
 permissions:
   contents: read
@@ -18,11 +18,30 @@ jobs:
           python-version: '3.10'
       - name: Manifests are valid JSON
         run: |
-          node -e "for (const f of ['.claude-plugin/plugin.json','.claude-plugin/marketplace.json']) JSON.parse(require('fs').readFileSync(f,'utf8'))"
+          node -e "for (const f of ['plugin.json','.codex-plugin/plugin.json','.agents/plugins/marketplace.json','.claude-plugin/plugin.json','.claude-plugin/marketplace.json']) JSON.parse(require('fs').readFileSync(f,'utf8'))"
       - name: Skill frontmatter has name and description
         run: |
           head -5 skills/artiboard/SKILL.md | grep -q '^name: artiboard$'
           head -5 skills/artiboard/SKILL.md | grep -q '^description: '
+      - name: Skills CLI discovers and installs a runnable package
+        env:
+          DISABLE_TELEMETRY: '1'
+        run: |
+          artiboard_source="$PWD"
+          artiboard_install="$(mktemp -d)"
+          trap 'rm -rf "$artiboard_install"' EXIT
+          cd "$artiboard_install"
+          npx --yes skills@1.7.4 add "$artiboard_source" --list
+          npx --yes skills@1.7.4 add "$artiboard_source" --skill artiboard --agent codex --copy --yes
+          for resource in SKILL.md LICENSE agents/openai.yaml assets/board.html assets/local.js scripts/local_board.py references/local.md references/artifact.md references/protocol.md; do
+            test -f ".agents/skills/artiboard/$resource"
+          done
+          cmp "$artiboard_source/LICENSE" .agents/skills/artiboard/LICENSE
+          python3 .agents/skills/artiboard/scripts/local_board.py init --title "Package smoke test" --person tester --lang en
+          python3 .agents/skills/artiboard/scripts/local_board.py request <<'JSON' > config.json
+          {"action":"get","path":"meta/config"}
+          JSON
+          python3 -c "import json; assert json.load(open('config.json'))['data']['title'] == 'Package smoke test'"
       - name: Board script parses
         run: |
           node -e "const s=require('fs').readFileSync('skills/artiboard/assets/board.html','utf8');require('fs').writeFileSync('/tmp/board.js',s.match(/<script>([\s\S]*)<\/script>/)[1])"

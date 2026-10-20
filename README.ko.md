@@ -20,13 +20,43 @@ Codex를 비롯해 파일과 셸을 사용할 수 있는 에이전트도 로컬 
 Artifact 도구가 없으면 로컬 웹서버를 사용해 줘.
 ```
 
-다른 프로젝트에 스킬을 설치하려면 대상 프로젝트에서 사용하는 패키지 관리자를 이용합니다. `skills` CLI의 예:
+## 설치
+
+설치 방식은 하나를 선택합니다. Skills CLI에는 Node.js/npm이 필요하며, 기본 설치 범위는 프로젝트입니다. 대상 프로젝트에서 이 checkout의 절대 경로를 지정합니다.
 
 ```bash
-npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex claude-code
+npx skills add /absolute/path/to/artiboard --skill artiboard --agent codex
 ```
 
-실제로 사용하는 에이전트만 선택합니다. 개인 전역 설치는 `--global`을 별도로 선택할 때만 적용합니다. clone하거나 소스를 수정하는 것만으로 전역 설치되지는 않습니다. 자세한 절차는 [에이전트 안내](FOR_AGENTS.md)를 참고하세요.
+실제로 사용하는 에이전트 이름만 남깁니다. `--list`로 설치 전 검색 결과를 확인할 수 있으며, 개인 전역 설치는 `--global`을 선택할 때만 적용합니다. 패키지에는 Agent Skills 메타데이터(`license`, `compatibility`, 작성자·버전·출처), Codex 표시 정보, 실행 코드, 에셋, 참고 문서와 MIT 라이선스가 포함됩니다. npm에 패키지를 발행할 필요는 없습니다.
+
+fork의 `universal` 브랜치가 원격에 게시된 뒤에는 GitHub에서 설치할 수 있습니다.
+
+```bash
+npx skills add https://github.com/composite/artiboard/tree/universal --skill artiboard --agent codex
+```
+
+브랜치를 push하기 전에는 로컬 checkout 명령을 사용합니다. 브랜치 없는 `composite/artiboard`는 기본 브랜치를 사용하므로 원본 버전이 설치될 수 있습니다.
+
+Codex 플러그인으로 설치하려면 `codex plugin`을 지원하는 CLI에서 실행합니다.
+
+```bash
+codex plugin marketplace add /absolute/path/to/artiboard
+codex plugin add artiboard@artiboard-universal
+```
+
+이 명령은 현재 Codex 사용자의 플러그인 설정에 마켓플레이스를 등록하고 설치합니다. 프로젝트에만 스킬을 설치하려면 Skills CLI를 사용하세요. 데스크톱 앱에서는 플러그인 디렉터리의 **Artiboard Universal**에서 **Artiboard**를 설치할 수 있습니다. 새 로컬 소스가 보이지 않으면 앱을 재시작합니다. 저장소에는 범용 `plugin.json`, `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`이 포함됩니다. 원격 브랜치 게시 후에는 마켓플레이스 등록에 `codex plugin marketplace add composite/artiboard --ref universal`도 사용할 수 있습니다.
+
+Claude Code에서는 원본 [yulmucoffee/artiboard](https://github.com/yulmucoffee/artiboard)를 사용합니다.
+
+```bash
+claude plugin marketplace add yulmucoffee/artiboard --scope project
+claude plugin install artiboard@artiboard --scope project
+```
+
+Claude 매니페스트는 원본 그대로 유지합니다. 이 fork의 Codex 마켓플레이스 이름은 `artiboard-universal`이며 원본 Claude 플러그인을 대체하지 않습니다. 같은 에이전트에 스킬을 중복 활성화하지 마세요. clone하거나 소스를 수정하는 것만으로 전역 설치되지는 않습니다. 자세한 절차는 [에이전트 안내](FOR_AGENTS.md)를 참고하세요.
+
+## 로컬 보드 실행
 
 이 checkout에서 빈 로컬 보드를 바로 실행하려면 제목과 사용자 ID를 정한 뒤 실행합니다.
 
@@ -81,6 +111,18 @@ node tests/local-smoke.cjs
 node examples/build-demo.cjs
 ```
 
-영속 저장, 배치 취소, 동시 담당 지정, worktree 경로, HTTP 요청 검증과 실제 로컬 서버를 통한 UI 쓰기·연결 종료·재시작을 검사합니다. `jsdom`은 개발 검증에만 필요하며 보드 실행에는 외부 패키지가 필요 없습니다.
+영속 저장, 배치 취소, 동시 담당 지정, worktree 경로, HTTP 요청 검증과 실제 로컬 서버를 통한 UI 쓰기·연결 종료·재시작을 검사합니다. CI에서는 Skills CLI의 패키지 검색·설치, 매니페스트, 스크립트 문법과 데모 최신 여부도 확인합니다. `jsdom`은 개발 검증에만 필요하며 보드 실행에는 외부 패키지가 필요 없습니다.
+
+```text
+skills/artiboard/SKILL.md            실행 방식 선택과 작업 절차
+skills/artiboard/agents/openai.yaml Codex 스킬 표시 정보
+skills/artiboard/assets/            공통 페이지와 로컬 브라우저 어댑터
+skills/artiboard/scripts/           표준 라이브러리 기반 로컬 서버·CLI
+skills/artiboard/references/        로컬·Artifact·프로젝트 규칙 안내
+plugin.json                        범용 Agent Plugins 매니페스트
+.codex-plugin/plugin.json          Codex 호환 매니페스트와 표시 정보
+.agents/plugins/marketplace.json   Codex 저장소 마켓플레이스
+.claude-plugin/                    Claude Code 플러그인·마켓플레이스
+```
 
 yulmucoffee의 원본 artiboard를 바탕으로 확장했습니다. Anthropic·OpenAI와 제휴한 제품이 아닙니다. [MIT 라이선스](LICENSE).

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "artiboard",
+  "version": "0.1.0",
+  "description": "Project task boards for people and coding agents, with Claude Artifacts or a persistent local webserver.",
+  "author": {
+    "name": "Composite",
+    "email": "ukjinplant@msn.com",
+    "url": "https://github.com/composite"
+  },
+  "homepage": "https://github.com/composite/artiboard",
+  "repository": "https://github.com/composite/artiboard",
+  "license": "MIT",
+  "keywords": [
+    "task-board",
+    "kanban",
+    "artifacts",
+    "codex",
+    "multi-agent",
+    "coordination",
+    "skills",
+    "sqlite"
+  ]
+}
